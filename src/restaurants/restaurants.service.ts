@@ -42,21 +42,19 @@ export class RestaurantsService {
 
   async findAll(listRestaurantsDto: ListRestaurantsDto): Promise<Restaurant[]> {
     const filter = listRestaurantsDto.cuisine
-      ? { cuisine: listRestaurantsDto.cuisine }
+      ? { cuisines: listRestaurantsDto.cuisine }
       : {};
     return this.restaurantModel.find(filter).exec();
   }
 
-  async findNearby(
-    nearbyRestaurantsDto: NearbyRestaurantsDto,
-  ): Promise<Restaurant[]> {
+  async findNearby(lat: number, lng: number): Promise<Restaurant[]> {
     return this.restaurantModel
       .find({
         location: {
           $near: {
             $geometry: {
               type: 'Point',
-              coordinates: [nearbyRestaurantsDto.lng, nearbyRestaurantsDto.lat],
+              coordinates: [lng, lat],
             },
             $maxDistance: 1000,
           },
@@ -65,7 +63,12 @@ export class RestaurantsService {
       .exec();
   }
 
-  async findOne(slug: string): Promise<Restaurant> {
+  async findOne(slug: string): Promise<Restaurant | null> {
+    const filter = isValidObjectId(slug) ? { _id: slug } : { slug: slug };
+    return this.restaurantModel.findOne(filter).exec();
+  }
+
+  async findOneBySlug(slug: string): Promise<Restaurant> {
     const filter = isValidObjectId(slug) ? { _id: slug } : { slug: slug };
     const resturant = await this.restaurantModel.findOne(filter).exec();
     if (!resturant) {

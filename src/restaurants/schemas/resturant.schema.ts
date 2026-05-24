@@ -55,4 +55,3 @@ export class Restaurant {
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);
 
 RestaurantSchema.index({ location: '2dsphere' });
-
